@@ -58,6 +58,22 @@ async function run(){
            const allreviews = await cursor.toArray();
            res.send(allreviews);
          });
+         app.get("/allReviews/:id", async (req, res) => {
+        //    const decoded = req.decoded;
+        //    console.log("inside orderapi", decoded);
+        //    if (decoded.email !== req.query.email) {
+        //      res.status(403).send({ message: "unauthorized access" });
+        //    }
+           let query = {};
+           if (req.query.email) {
+             query = {
+               email: req.query.email,
+             };
+           }
+           const reviewsId = await reviewsCollection.findOne(query);
+        //    const allreviews = await cursor.toArray();
+           res.send(reviewsId);
+         });
 
 
          app.get("/allServices", async (req, res) => {
