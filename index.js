@@ -18,6 +18,25 @@ const client = new MongoClient(uri, {
   serverApi: ServerApiVersion.v1,
 });
 
+//
+
+function verifyJwt(req, res, next) {
+  const authHeader = req.headers.authorization;
+  if (!authHeader) {
+    return res.status(401).send({ message: "unauthorized user" });
+  }
+  const token = authHeader.split(" ")[1];
+  jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, function (err, decoded) {
+    if (err) {
+     return res.status(401).send({ message: "unauthorized access" });
+    }
+    req.decoded = decoded;
+    next();
+  });
+} 
+
+
+//
 
 async function run(){
     try{
@@ -57,12 +76,12 @@ async function run(){
             res.send(result);
          });
 
-         app.get("/allReviews", async (req, res) => {
-        //    const decoded = req.decoded;
-        //    console.log("inside orderapi", decoded);
-        //    if (decoded.email !== req.query.email) {
-        //      res.status(403).send({ message: "unauthorized access" });
-        //    }
+         app.get("/allReviews", verifyJwt, async (req, res) => {
+              const decoded = req.decoded;
+              console.log("inside orderapi", decoded);
+           //    if (decoded.email !== req.query.email) {
+           //      res.status(403).send({ message: "unauthorized access" });
+           //    }
            let query = {};
            if (req.query.email) {
              query = {
@@ -142,11 +161,11 @@ async function run(){
           });
 
           app.get("/allReviews", verifyJwt, async (req, res) => {
-            // const decoded = req.decoded;
-            // console.log("inside orderapi", decoded);
-            // if (decoded.email !== req.query.email) {
-            //   res.status(403).send({ message: "unauthorized access" });
-            // }
+            const decoded = req.decoded;
+            console.log("inside orderapi", decoded);
+            if (decoded.email !== req.query.email) {
+              res.status(403).send({ message: "forbidden access" });
+            }
             let query = {};
             if (req.query.email) {
               query = {
