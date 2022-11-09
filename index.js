@@ -3,7 +3,7 @@ const cors = require('cors');
 const app = express();
 const port = process.env.PORT || 5000;
 require('dotenv').config();
-
+const jwt = require("jsonwebtoken");
 app.use(cors());
 app.use(express.json());
 
@@ -26,7 +26,16 @@ async function run(){
           .collection("reviews");
 
          const reviewsCollection = client.db("wildlife-studio").collection('addReviews'); 
+// token
 
+        app.post('/jwt', (req, res) =>{
+            const user = req.body;
+            console.log(user);
+            const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
+              expiresIn: "1h",
+            });
+            res.send({ token });
+        })
 
          app.get("/services", async (req, res) => {
            const query = {};
@@ -74,23 +83,23 @@ async function run(){
          });
          
 
-        //  app.get("/allReviews/:id", async (req, res) => {
-        // //    const decoded = req.decoded;
-        // //    console.log("inside orderapi", decoded);
-        // //    if (decoded.email !== req.query.email) {
-        // //      res.status(403).send({ message: "unauthorized access" });
-        // //    }
-        //     const id = req.params.id;
-        //    let query = {_id: ObjectId(id)};
-        //    if (req.query.email) {
-        //      query = {
-        //        email: req.query.email,
-        //      };
+         app.get("/allReviews/:id", async (req, res) => {
+        //    const decoded = req.decoded;
+        //    console.log("inside orderapi", decoded);
+        //    if (decoded.email !== req.query.email) {
+        //      res.status(403).send({ message: "unauthorized access" });
         //    }
-        //    const reviewsId = await reviewsCollection.findOne(query);
-        // //    const allreviews = await cursor.toArray();
-        //    res.send(reviewsId);
-        //  });
+            const id = req.params.id;
+           let query = {_id: ObjectId(id)};
+           if (req.query.email) {
+             query = {
+               email: req.query.email,
+             };
+           }
+           const reviewsId = await reviewsCollection.findOne(query);
+        //    const allreviews = await cursor.toArray();
+           res.send(reviewsId);
+         });
 
 
          app.get("/allServices", async (req, res) => {
@@ -106,24 +115,24 @@ async function run(){
            res.send(service);
          });
 
-         console.log(req);
-           app.put("/allReviews/:id", async (req, res) => {
-             const id = req.params.id;
-             console.log('body reeeeeere', req.body);
-             const filter = { _id: ObjectId(id) };
-             const myReviews = req.body;
+        
+        //    app.put("/allReviews/:id", async (req, res) => {
+        //      const id = req.params.id;
+        //      console.log('body reeeeeere', req.body);
+        //      const filter = { _id: ObjectId(id) };
+        //      const myReviews = req.body;
              
-             const updateDoc = {
-               $set: {
-                 email: myReviews.email,
-                 name: myReviews.name
+        //      const updateDoc = {
+        //        $set: {
+        //          email: myReviews.email,
+        //          name: myReviews.name
 
-               },
-             };
-             const result = await reviewsCollection.updateOne(filter, updateDoc);
-             console.log('result koi', result);
-             res.send(result);
-           });
+        //        },
+        //      };
+        //      const result = await reviewsCollection.updateOne(filter, updateDoc);
+        //      console.log('result koi', result);
+        //      res.send(result);
+        //    });
 
           app.delete("/allReviews/:id", async (req, res) => {
             const id = req.params.id;
@@ -131,6 +140,25 @@ async function run(){
             const result = await reviewsCollection.deleteOne(query);
             res.send(result);
           });
+
+          app.get("/allReviews", verifyJwt, async (req, res) => {
+            // const decoded = req.decoded;
+            // console.log("inside orderapi", decoded);
+            // if (decoded.email !== req.query.email) {
+            //   res.status(403).send({ message: "unauthorized access" });
+            // }
+            let query = {};
+            if (req.query.email) {
+              query = {
+                email: req.query.email,
+              };
+            }
+            const cursor = reviewsCollection.find(query);
+            const review = await cursor.toArray();
+            res.send(review);
+          });
+
+    
 
     }
     catch{
