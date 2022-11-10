@@ -160,6 +160,12 @@ async function run(){
         const result = await reviewsCollection.deleteOne(query);
         res.send(result);
       });
+      app.get("/allReviews", async (req, res) => {
+          const query = req.params.services
+        const result = await reviewsCollection.findOne(query);
+        console.log('serviceId', result);
+        res.send(result);
+      });
 
       // verifyJwt,
 
@@ -179,22 +185,8 @@ async function run(){
         const review = await cursor.toArray();
         res.send(review);
       });
-      app.get("/allReviews", async (req, res) => {
-        // const decoded = req.decoded;
-        // console.log("inside orderapi", decoded);
-        // if (decoded.email !== req.query.email) {
-        //   res.status(403).send({ message: "forbidden access" });
-        // }
-        let query = {};
-        if (req.query.serviceId) {
-          query = {
-            serviceId: req.query.serviceId,
-          };
-        }
-        const cursor = reviewsCollection.find(query);
-        const review = await cursor.toArray();
-        res.send(review);
-      });
+     
+      
     }
     catch{
 
@@ -204,7 +196,7 @@ async function run(){
 run().catch(error => console.error(error))
 
 app.get('/', (req, res) => {
-    req.send('studio server running');
+    res.send('studio server running');
 });
 
 app.listen(port, () => {
