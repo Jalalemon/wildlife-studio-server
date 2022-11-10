@@ -179,6 +179,22 @@ async function run(){
         const review = await cursor.toArray();
         res.send(review);
       });
+      app.get("/allReviews", async (req, res) => {
+        // const decoded = req.decoded;
+        // console.log("inside orderapi", decoded);
+        // if (decoded.email !== req.query.email) {
+        //   res.status(403).send({ message: "forbidden access" });
+        // }
+        let query = {};
+        if (req.query.serviceId) {
+          query = {
+            serviceId: req.query.serviceId,
+          };
+        }
+        const cursor = reviewsCollection.find(query);
+        const review = await cursor.toArray();
+        res.send(review);
+      });
     }
     catch{
 
